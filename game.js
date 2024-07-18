@@ -242,11 +242,12 @@ class othello_logic {
             if (this.table[checking_x][checking_y] === '.' || this.table[checking_x][checking_y] === 'O' ) {
                 // console.log('kdfhg')
                 break
-            } else if (this.table[checking_x][checking_y] === this.opposite) {
+            } 
+            else if (this.table[checking_x][checking_y] === this.opposite) {
                 // console.log('detect opposite')
                 positions_to_flip.push([checking_x, checking_y]);
             } else if (this.table[checking_x][checking_y] === this.current_player) {
-                console.log(positions_to_flip,this.current_player);
+                // console.log(positions_to_flip,this.current_player);
                 // Flip all positions in positions_to_flip
                 for (let pos of positions_to_flip) {
                     
