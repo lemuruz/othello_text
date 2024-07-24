@@ -64,34 +64,34 @@ class BOARD {
 
         for (let direction of checkDirection) {
             let [dix, diy] = direction;
-            this.flipDirection(x, y, dix, diy, opposite, currentPlayer);
+            flipDirection(x, y, dix, diy, opposite, currentPlayer);
         }
         this.board[x][y] = currentPlayer;
-    }
+    
 
-    flipDirection(current_x, current_y, direction_x, direction_y, opposite, currentToken) {
-        let board = this.board;
-        let positions_to_flip = [];
-        let checking_x = current_x + direction_x;
-        let checking_y = current_y + direction_y;
+        function flipDirection(current_x, current_y, direction_x, direction_y, opposite, currentplayerToken) {
+            let positions_to_flip = [];
+            let checking_x = current_x + direction_x;
+            let checking_y = current_y + direction_y;
 
-        while (checking_x >= 0 && checking_x < 8 && checking_y >= 0 && checking_y < 8) {
-            if (board[checking_x][checking_y] === '🟩' || board[checking_x][checking_y] === '⭕') {
-                break;
-            } else if (board[checking_x][checking_y] === opposite) {
-                positions_to_flip.push([checking_x, checking_y]);
-            } else if (board[checking_x][checking_y] === currentToken) {
-                for (let pos of positions_to_flip) {
-                    board[pos[0]][pos[1]] = currentToken;
+            while (checking_x >= 0 && checking_x < 8 && checking_y >= 0 && checking_y < 8) {
+                if (board[checking_x][checking_y] === '🟩' || board[checking_x][checking_y] === '⭕') {
+                    break;
+                } else if (board[checking_x][checking_y] === opposite) {
+                    positions_to_flip.push([checking_x, checking_y]);
+                } else if (board[checking_x][checking_y] === currentplayerToken) {
+                    for (let pos of positions_to_flip) {
+                        board[pos[0]][pos[1]] = currentplayerToken;
+                    }
+                    return;
                 }
-                return;
+                checking_x += direction_x;
+                checking_y += direction_y;
             }
-            checking_x += direction_x;
-            checking_y += direction_y;
         }
     }
-
     checkBoard() {
+        let board = this.board;
         for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
                 if (this.board[i][j] === '⭕') {
@@ -110,7 +110,7 @@ class BOARD {
                     let valid = false;
                     for (let direction of checkDirection) {
                         let [dix, diy] = direction;
-                        if (this.checkIfThatDirectionValid(i, j, dix, diy, opposite, currentPlayer)) {
+                        if (checkIfThatDirectionValid(i, j, dix, diy, opposite, currentPlayer)) {
                             valid = true;
                             break;
                         }
@@ -125,30 +125,30 @@ class BOARD {
         if (!hasEmptySpace) {
             this.gameOver();
         }
-    }
+    
+        
+        function checkIfThatDirectionValid(current_x, current_y, direction_x, direction_y, opposite, currentToken) {
+            
+            let checking_x = current_x + direction_x;
+            let checking_y = current_y + direction_y;
+            let opponent_detected = false;
 
-    checkIfThatDirectionValid(current_x, current_y, direction_x, direction_y, opposite, currentToken) {
-        let board = this.board;
-        let checking_x = current_x + direction_x;
-        let checking_y = current_y + direction_y;
-        let opponent_detected = false;
-
-        while (checking_x >= 0 && checking_x < 8 && checking_y >= 0 && checking_y < 8) {
-            if (board[checking_x][checking_y] === '🟩' || board[checking_x][checking_y] === '⭕') {
-                return false;
-            } else if (board[checking_x][checking_y] === opposite) {
-                opponent_detected = true;
-            } else if (board[checking_x][checking_y] === currentToken && opponent_detected) {
-                return true;
-            } else {
-                return false;
+            while (checking_x >= 0 && checking_x < 8 && checking_y >= 0 && checking_y < 8) {
+                if (board[checking_x][checking_y] === '🟩' || board[checking_x][checking_y] === '⭕') {
+                    return false;
+                } else if (board[checking_x][checking_y] === opposite) {
+                    opponent_detected = true;
+                } else if (board[checking_x][checking_y] === currentToken && opponent_detected) {
+                    return true;
+                } else {
+                    return false;
+                }
+                checking_x += direction_x;
+                checking_y += direction_y;
             }
-            checking_x += direction_x;
-            checking_y += direction_y;
+            return false;
         }
-        return false;
-    }
-
+    }   
     gameOver() {
         let player1Count = 0;
         let player2Count = 0;
@@ -185,7 +185,7 @@ class BOARD {
                 input = this.currentPlayer.playerInput();
             } else {
                 console.log('Bot turn');
-                await delay(0);
+                await delay(1500);
                 input = this.currentPlayer.bestMove(this.board);
             }
 
