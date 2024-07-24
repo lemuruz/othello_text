@@ -48,7 +48,7 @@ class BOARD {
         let col = coordinates[1].charCodeAt(0) - 'a'.charCodeAt(0);
 
         if (this.board[coordinates[0]][col] === '⭕') {
-            this.placePiece(parseInt(coordinates[0]), col);
+            this.placeToken(parseInt(coordinates[0]), col);
             return true;
         } else {
             console.log('This coordinate is invalid, please select "⭕"');
@@ -224,14 +224,14 @@ class BOT {
         this.playerToken = token;
         this.difficulty = difficulty;
         this.scoreBoard = [
-            [4, 3, 3, 3, 3, 3, 3, 4],
-            [3, 3, 2, 2, 2, 2, 3, 3],
-            [3, 2, 1, 1, 1, 1, 2, 3],
-            [3, 2, 1, 0, 0, 1, 2, 3],
-            [3, 2, 1, 0, 0, 1, 2, 3],
-            [3, 2, 1, 1, 1, 1, 2, 3],
-            [3, 3, 2, 2, 2, 2, 3, 3],
-            [4, 3, 3, 3, 3, 3, 3, 4]
+            [100, -10, 10, 5, 5, 10, -10, 100],
+            [-10, -20, 1, 1, 1, 1, -20, -10],
+            [10, 1, 3, 3, 3, 3, 1, 10],
+            [5, 1, 3, 1, 1, 3, 1, 5],
+            [5, 1, 3, 1, 1, 3, 1, 5],
+            [10, 1, 3, 3, 3, 3, 1, 10],
+            [-10, -20, 1, 1, 1, 1, -20, -10],
+            [100, -10, 10, 5, 5, 10, -10, 100]
         ];
     }
 
