@@ -1,17 +1,24 @@
 const prompt = require('prompt-sync')();
+Array.prototype.random = function () {
+    return this[Math.floor((Math.random() * this.length))];
+}
+const delay = (delayInms) => {
+    return new Promise(resolve => setTimeout(resolve, delayInms));
+};
+
 let gameIsRunning = true;
 
 class BOARD {
-    constructor() {
+    constructor(player2) {
         this.board = Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => "🟩"));
         this.player1 = new PLAYER('⚪');
-        this.player2 = new PLAYER('⚫');
+        this.player2 = player2;
         this.currentPlayer = this.player1;
         this.board[3][3] = this.player1.playerToken;
         this.board[3][4] = this.player2.playerToken;
         this.board[4][3] = this.player2.playerToken;
         this.board[4][4] = this.player1.playerToken;
-        
+
         this.playGame();
     }
 
@@ -39,6 +46,7 @@ class BOARD {
         }
 
         let col = coordinates[1].charCodeAt(0) - 'a'.charCodeAt(0);
+
         if (this.board[coordinates[0]][col] === '⭕') {
             this.placePiece(parseInt(coordinates[0]), col);
             return true;
@@ -146,29 +154,41 @@ class BOARD {
         let player2Count = 0;
         gameIsRunning = false;
         console.clear();
-        
+
         for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
-                if (this.board[i][j] = this.player1.playerToken){
-                    player1Count +=1;
-                }else{
-                    player2Count +=1;
+                if (this.board[i][j] == this.player1.playerToken) {
+                    player1Count += 1;
+                } else if (this.board[i][j] == this.player2.playerToken) {
+                    player2Count += 1;
                 }
             }
         }
 
         console.log('Game over');
-        console.log('player1',this.player1.playerToken);
-        console.log('player2',this.player2.playerToken);
-        if (player1Count > player2Count){console.log('player1 WIN!')}
-        else if (player1Count < player2Count){console.log('player2 WIN!')}
-        else{console.log('TIE!')}
+        console.log('Player 1', this.player1.playerToken, 'score:', player1Count);
+        console.log('Player 2', this.player2.playerToken, 'score:', player2Count);
+        if (player1Count > player2Count) {
+            console.log('Player 1 WINS!');
+        } else if (player1Count < player2Count) {
+            console.log('Player 2 WINS!');
+        } else {
+            console.log('TIE!');
+        }
     }
 
-    playGame() {
+    async playGame() {
         while (gameIsRunning) {
             this.printBoard();
-            let input = this.currentPlayer.playerInput();
+            let input = null;
+            if (this.currentPlayer instanceof PLAYER) {
+                input = this.currentPlayer.playerInput();
+            } else {
+                console.log('Bot turn');
+                await delay(0);
+                input = this.currentPlayer.bestMove(this.board);
+            }
+
             if (this.isValidMove(input)) {
                 this.switchPlayer();
             }
@@ -182,13 +202,16 @@ class PLAYER {
     }
 
     playerInput() {
-        if(!gameIsRunning){
+        if (!gameIsRunning) {
             return false;
         }
         console.log('Player', this.playerToken, 'turn');
         let input = prompt('Enter your move (e.g., 0a): ');
         if (input.length === 2 && !isNaN(input[0]) && input[0] >= '0' && input[0] <= '7' && input[1] >= 'a' && input[1] <= 'h') {
             return input;
+        } else if (input === 'exit') {
+            gameIsRunning = false;
+            return false;
         } else {
             console.log('Invalid input');
             return this.playerInput();
@@ -196,4 +219,75 @@ class PLAYER {
     }
 }
 
-new BOARD();
+class BOT {
+    constructor(token, difficulty) {
+        this.playerToken = token;
+        this.difficulty = difficulty;
+        this.scoreBoard = [
+            [4, 3, 3, 3, 3, 3, 3, 4],
+            [3, 3, 2, 2, 2, 2, 3, 3],
+            [3, 2, 1, 1, 1, 1, 2, 3],
+            [3, 2, 1, 0, 0, 1, 2, 3],
+            [3, 2, 1, 0, 0, 1, 2, 3],
+            [3, 2, 1, 1, 1, 1, 2, 3],
+            [3, 3, 2, 2, 2, 2, 3, 3],
+            [4, 3, 3, 3, 3, 3, 3, 4]
+        ];
+    }
+
+    bestMove(board) {
+        let placeableCoordinates = [];
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                if (board[i][j] === '⭕') {
+                    placeableCoordinates.push(i.toString() + String.fromCharCode('a'.charCodeAt(0) + j));
+                }
+            }
+        }
+
+        switch (this.difficulty) {
+            case 'lv1':
+                return placeableCoordinates.random();
+            case 'lv2':
+                let highestScoreCoordinates = placeableCoordinates[0];
+                for (let i of placeableCoordinates) {
+                    if (this.scoreBoard[highestScoreCoordinates[0]][highestScoreCoordinates[1].charCodeAt(0) - 'a'.charCodeAt(0)] <
+                        this.scoreBoard[i[0]][i[1].charCodeAt(0) - 'a'.charCodeAt(0)]) {
+                        highestScoreCoordinates = i;
+                    }
+                }
+                return highestScoreCoordinates;
+        }
+    }
+}
+
+// onrun
+let input_ = null;
+while (true) {
+    input_ = prompt('choose player2 (player)(bot) : ');
+
+    if (input_ === 'player' || input_ === 'bot') {
+        break;
+    } else {
+        console.clear();
+        console.log('invalid input');
+    }
+}
+
+let difficulty = null;
+if (input_ === 'bot') {
+    while (true) {
+        difficulty = prompt('choose difficulty (lv1)(lv2) : ');
+        if (difficulty === 'lv1' || difficulty === 'lv2') {
+            break;
+        }
+        console.clear();
+        console.log('invalid input');
+    }
+}
+
+if (input_ === 'bot') {
+    new BOARD(new BOT('⚫', difficulty));
+} else {
+    new BOARD(new PLAYER('⚫'));
+}
