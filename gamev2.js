@@ -56,7 +56,7 @@ class BOARD {
         }
     }
 
-    placePiece(x, y) {
+    placeToken(x, y) {
         let board = this.board;
         let opposite = this.currentPlayer === this.player1 ? this.player2.playerToken : this.player1.playerToken;
         let currentPlayer = this.currentPlayer.playerToken;
